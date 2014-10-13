@@ -15,7 +15,7 @@ public class ViewScrollAndWindowWidthAndLevelingDemo {
     		OverriddenSingleImagePanelForDemo singleImagePanel = new OverriddenSingleImagePanelForDemo(sImg);
     		p.add(singleImagePanel);
     		p.setBackground(Color.BLACK);
-    		p.setSize(512,512);
+    		p.setSize(sImg.getWidth(),sImg.getHeight());
     		p.setTitle("Demo for view, scroll and window width/level operations");
     		p.setVisible(true);
     		
