@@ -20,7 +20,7 @@ public class OverriddenSingleImagePanelForDemo extends SingleImagePanel {
 	public OverriddenSingleImagePanelForDemo(SourceImage sImg) {
 		super(sImg);
 		MaxFrames = sImg.getNumberOfFrames();
-		this.setSideAndViewAnnotationString(getTextToDisplay(),0, "SansSerif",Font.BOLD, 14, Color.WHITE,true);
+		this.setSideAndViewAnnotationString(getTextToDisplay(),30, "SansSerif",Font.BOLD, 14, Color.WHITE,true);
 	}
 
 	private String getTextToDisplay() {
@@ -38,13 +38,17 @@ public class OverriddenSingleImagePanelForDemo extends SingleImagePanel {
 		}
 		ApplicationEventDispatcher.getApplicationEventDispatcher()
 		.processEvent(new FrameSelectionChangeEvent(new EventContext("Pass event here"), frameIndex));
+		UpdateDisplayInformation();
+	}
+
+	private void UpdateDisplayInformation() {
 		this.sideAndViewAnnotationString = getTextToDisplay();
 	}
 	
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		super.mouseDragged(e);
-		this.sideAndViewAnnotationString = getTextToDisplay();
+		UpdateDisplayInformation();
 	}
 
 }
