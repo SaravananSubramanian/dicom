@@ -12,37 +12,37 @@ import com.pixelmed.event.EventContext;
 
 public class OverriddenSingleImagePanelForDemo extends SingleImagePanel {
 	
-	//initialize these to default values
+	//initialize these to some default values
 	private static final long serialVersionUID = 1L;
-	private int frameIndex = 1;
+	private int frameIndex = 0;
 	private int MaxFrames = 1;
 
 	public OverriddenSingleImagePanelForDemo(SourceImage sImg) {
 		super(sImg);
 		MaxFrames = sImg.getNumberOfFrames();
-		this.setSideAndViewAnnotationString(getTextToDisplay(),30, "SansSerif",Font.BOLD, 14, Color.WHITE,true);
+		this.setSideAndViewAnnotationString(getTextToDisplay(1),30, "SansSerif",Font.BOLD, 14, Color.WHITE,true);
 	}
 
-	private String getTextToDisplay() {
+	private String getTextToDisplay(int frameIndexNumber) {
 		return " Window Width->" + (int) this.windowWidth 
 				+ " Level(or Center)->" + (int) this.windowCenter 
-				+ " Frame Index->" + frameIndex;
+				+ " Frame Index->" + frameIndexNumber;
 	}
 	
 	@Override
 	public void keyPressed(KeyEvent e) {
 		super.keyPressed(e);
-		frameIndex++;
-		if(frameIndex >= MaxFrames){
-			frameIndex = 1;
+		if(frameIndex == MaxFrames){ //this is to reset the frame loop
+			frameIndex = 0;
 		}
 		ApplicationEventDispatcher.getApplicationEventDispatcher()
-		.processEvent(new FrameSelectionChangeEvent(new EventContext("Pass event here"), frameIndex));
+		.processEvent(new FrameSelectionChangeEvent(new EventContext("Pass info here"), frameIndex++));
 		UpdateDisplayInformation();
+		
 	}
 
 	private void UpdateDisplayInformation() {
-		this.sideAndViewAnnotationString = getTextToDisplay();
+		this.sideAndViewAnnotationString = getTextToDisplay(frameIndex);
 	}
 	
 	@Override
