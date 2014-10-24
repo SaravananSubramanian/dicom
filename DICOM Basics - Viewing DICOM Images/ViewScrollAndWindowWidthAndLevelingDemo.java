@@ -7,17 +7,17 @@ import com.pixelmed.display.SourceImage;
 public class ViewScrollAndWindowWidthAndLevelingDemo {
 	
 	public static void main(String[] args) {
-		String dicomInputFile = "/Users/saravanan/PixelMedTutorial/exported_jpeg_IM-0001-0115.dcm";
+		String dicomInputFile = "/Users/Saravanan/PixelMedTutorial/exported_jpeg_IM-0001-0115.dcm";
 		try {
-    		JFrame p = new JFrame();
+    		JFrame frame = new JFrame();
     		SourceImage sImg = new SourceImage(dicomInputFile);
     		System.out.println("Number of frames: " + sImg.getNumberOfFrames());
     		OverriddenSingleImagePanelForDemo singleImagePanel = new OverriddenSingleImagePanelForDemo(sImg);
-    		p.add(singleImagePanel);
-    		p.setBackground(Color.BLACK);
-    		p.setSize(sImg.getWidth(),sImg.getHeight());
-    		p.setTitle("Demo for view, scroll and window width/level operations");
-    		p.setVisible(true);
+    		frame.add(singleImagePanel);
+    		frame.setBackground(Color.BLACK);
+    		frame.setSize(sImg.getWidth(),sImg.getHeight());
+    		frame.setTitle("Demo for view, scroll and window width/level operations");
+    		frame.setVisible(true);
     		
 		} catch (Exception e) {
 			e.printStackTrace();
