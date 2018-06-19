@@ -1,13 +1,17 @@
 package com.saravanansubramanian.dicom.pixelmedtutorial;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+
 import com.pixelmed.dicom.AttributeList;
 import com.pixelmed.dicom.ImageToDicom;
 
 public class CreateADicomFile {
 	
 	public static void main(String[] args) {
-		String scJpegFilePath = "/Users/saravanan/PixelMedTutorial/ChestGeneralImage.jpg";
-		String newDicomFile = "/Users/saravanan/PixelMedTutorial/Saravanan.dcm";
+		String scJpegFilePath = "D:\\MyWebsiteWork\\javatutorialsproject\\sample_images\\ChestGeneralImage.jpg";
+		String newDicomFile = "D:\\MyWebsiteWork\\javatutorialsproject\\sample_images\\Saravanan.dcm";
 		try {
         	//generate the DICOM file from the jpeg file and the other attributes supplied
 			new ImageToDicom(scJpegFilePath, //path to existing JPEG image 
@@ -21,6 +25,13 @@ public class CreateADicomFile {
 			AttributeList list = new AttributeList();
     		list.read(newDicomFile);
     		System.out.println(list.toString());
+    		
+    		String content = list.toString();
+			File file = new File("c:\\junk\\filename.txt");
+			FileWriter fw = new FileWriter(file.getAbsoluteFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(content);
+			bw.close(); // Be sure to close BufferedWriter
         
         } catch (Exception e) {
 			e.printStackTrace();
