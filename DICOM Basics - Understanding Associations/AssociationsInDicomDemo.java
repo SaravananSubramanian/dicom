@@ -17,7 +17,7 @@ public class AssociationsInDicomDemo {
 			transferSyntaxList.add(TransferSyntax.Default);
 			transferSyntaxList.add(TransferSyntax.ExplicitVRBigEndian);
 			
-			byte prentnContextOfVerfSopClass = 1;//use any number here for tracking
+			byte prentnContextIdOfVerfSopClass = 1;//use any number here for tracking
 			String verificationSopClass = SOPClass.Verification; //this is the UID for the Verification SOP class
 			
 			//Print it to console so you can see its UID
@@ -25,7 +25,7 @@ public class AssociationsInDicomDemo {
 			
 			//Make a list of presentation contexts consisting of the Abstract syntax and the list of transfer syntaxes
 			//We will ask the Called AE to see whether it supports these
-			prestnContexts.add(new PresentationContext(prentnContextOfVerfSopClass, verificationSopClass,transferSyntaxList));
+			prestnContexts.add(new PresentationContext(prentnContextIdOfVerfSopClass, verificationSopClass,transferSyntaxList));
 			
 			//Attempt to create the association to David Clunie's public DICOM server
 			Association association = AssociationFactory.createNewAssociation("184.73.255.26", //their hostname or IP address
