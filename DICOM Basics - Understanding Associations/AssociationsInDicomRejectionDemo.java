@@ -7,15 +7,14 @@ import com.pixelmed.network.Association;
 import com.pixelmed.network.AssociationFactory;
 import com.pixelmed.network.PresentationContext;
 
-public class AssociationsInDicomDemo {
+public class AssociationsInDicomRejectionDemo {
 	
 	public static void main(String[] args) {
 		
 		try {
             LinkedList<PresentationContext> prestnContexts = new LinkedList<PresentationContext>();
 			LinkedList<String> transferSyntaxList = new LinkedList<String>();
-			transferSyntaxList.add(TransferSyntax.Default);
-			transferSyntaxList.add(TransferSyntax.ExplicitVRBigEndian);
+			transferSyntaxList.add(TransferSyntax.JPEG2000Lossless);
 			
 			byte prentnContextIdOfVerfSopClass = 1;//use any number here for tracking
 			String verificationSopClass = SOPClass.Verification; //this is the UID for the Verification SOP class
@@ -39,17 +38,13 @@ public class AssociationsInDicomDemo {
 																				false,
 																				2);
 			
-			//print the details of the association established to the console
-			System.out.println(association);
-			
-			//Check to see if the presentation context is supported by the Called AE
-			byte supportedContextId = association.getSuitablePresentationContextID(verificationSopClass);
-			System.out.println("The Verification SOP class is supported");
-			//Check to see what transfer syntax is preferred by the Called AE
-			String transferSyntaxSupported = association.getTransferSyntaxForPresentationContextID(supportedContextId);
-			//You should see Explicit VR Big-endian UID - 1.2.840.10008.1.2.2 returned here. 
-			//This is because an Explicit VR transfer syntax is always be preferable over Implicit (or the "Default") transfer syntax
-			System.out.println("The transfer syntax supported for this presentation context is " + transferSyntaxSupported);
+			//Pass an unsupported/meaningless transfer syntax for this SOP class and see what happens. This should throw an DICOM network exception
+			try {
+				byte supportedContextId = association.getSuitablePresentationContextID(verificationSopClass,TransferSyntax.JPEG2000Lossless);
+			} catch (Exception e) {
+				System.out.println(e);
+				System.out.println("The transfer syntax JPEG2000Lossless UID of " + TransferSyntax.JPEG2000Lossless + " is not supported");
+			}
         
         } catch (Exception e) {
         	//In real-life, do something about these exceptions
