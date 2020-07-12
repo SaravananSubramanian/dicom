@@ -12,6 +12,7 @@ public class DicomCFindFunctionalityDemo {
 	public static void main(String arg[]) {
 		
 		try {
+			// use the default character set for VR encoding - override this as necessary
 			SpecificCharacterSet specificCharacterSet = new SpecificCharacterSet((String[])null);
 			AttributeList identifier = new AttributeList();
 			
@@ -36,9 +37,11 @@ public class DicomCFindFunctionalityDemo {
 			
 		}
 		catch (Exception e) {
-			e.printStackTrace(System.err);
+			e.printStackTrace(System.err); // in real life, do something about this exception
 			System.exit(0);
 		}
 	}
 
 }
+
+

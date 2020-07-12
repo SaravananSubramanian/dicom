@@ -30,7 +30,7 @@ public class DicomCGetFunctionalityDemo {
 		//1. Perform a C-FIND operation for all studies matching a specific patient
 		//2. For each study found, retrieve all DICOM objects belonging to the study
 		//3. The C-FIND operation should help us find and later specify the SOP classes 
-		//   that we need to provide for the C-GET operation
+		//   that we need to provide for the C-GET operation negotiation
 		//4. As each file is received, write the information about the incoming data to the console
 
 		try {
@@ -119,7 +119,7 @@ class OurFindHandler extends IdentifierHandler {
 					identifier, 
 					new IdentifierHandler(), //override and provide your own handler if you need to do anything else
 					pathToStoreIncomingDicomFiles, 
-					StoredFilePathStrategy.BYSOPINSTANCEUIDCOMPONENTFOLDERS,
+					StoredFilePathStrategy.BYSOPINSTANCEUIDINSINGLEFOLDER,
 					new OurCGetOperationStoreHandler(), 
 					setofSopClassesExpected, 
 					0, 
