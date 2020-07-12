@@ -90,8 +90,8 @@ class OurCMoveFindHandler extends IdentifierHandler {
 		
 		try {
 		    AttributeList identifier = new AttributeList();
-		    { AttributeTag t = TagFromName.QueryRetrieveLevel; Attribute a = new CodeStringAttribute(t); a.addValue("STUDY"); identifier.put(t,a); }
-		    { AttributeTag t = TagFromName.StudyInstanceUID; Attribute a = new UniqueIdentifierAttribute(t); a.addValue(studyInstanceUID); identifier.put(t,a); }
+		    { AttributeTag tag = TagFromName.QueryRetrieveLevel; Attribute attribute = new CodeStringAttribute(tag); attribute.addValue("STUDY"); identifier.put(tag,attribute); }
+		    { AttributeTag tag = TagFromName.StudyInstanceUID; Attribute attribute = new UniqueIdentifierAttribute(tag); attribute.addValue(studyInstanceUID); identifier.put(tag,attribute); }
 		    
 		    
 		    new MoveSOPClassSCU(moveSCPAddress, moveScpPortNumber,moveScpAeTitle,moveScuAeTitle,storeScpAeTitle,SOPClass.StudyRootQueryRetrieveInformationModelMove,identifier);
