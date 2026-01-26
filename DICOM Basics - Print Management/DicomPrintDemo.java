@@ -4,6 +4,7 @@ import java.util.LinkedList;
 
 import com.pixelmed.dicom.Attribute;
 import com.pixelmed.dicom.AttributeList;
+import com.pixelmed.dicom.AttributeTag;
 import com.pixelmed.dicom.CodeStringAttribute;
 import com.pixelmed.dicom.IntegerStringAttribute;
 import com.pixelmed.dicom.ShortStringAttribute;
@@ -52,6 +53,12 @@ public class DicomPrintDemo {
 	private static final String BASIC_GRAYSCALE_IMAGE_BOX = "1.2.840.10008.5.1.1.4";
 	private static final String PRINTER_SOP_CLASS = "1.2.840.10008.5.1.1.16";
 	private static final String BASIC_GRAYSCALE_PRINT_META = "1.2.840.10008.5.1.1.9";
+
+	// Missing DICOM tags
+	private static final AttributeTag NumberOfCopies = new AttributeTag(0x2000, 0x0010);
+	private static final AttributeTag PrintPriority = new AttributeTag(0x2000, 0x0020);
+	private static final AttributeTag MediumType = new AttributeTag(0x2000, 0x0030);
+	private static final AttributeTag FilmDestination = new AttributeTag(0x2000, 0x0040);
 
 	public static void main(String[] args) {
 
@@ -116,7 +123,7 @@ public class DicomPrintDemo {
 				printerAETitle,
 				localAETitle,
 				presentationContexts,
-				null, false, null, 0, 0
+				null, false, 0
 			);
 
 			if (association != null) {
@@ -218,22 +225,22 @@ public class DicomPrintDemo {
 
 		try {
 			// Number of copies
-			Attribute copies = new IntegerStringAttribute(TagFromName.NumberOfCopies);
+			Attribute copies = new IntegerStringAttribute(NumberOfCopies);
 			copies.addValue("1");
 			list.put(copies);
 
 			// Print priority
-			Attribute priority = new CodeStringAttribute(TagFromName.PrintPriority);
+			Attribute priority = new CodeStringAttribute(PrintPriority);
 			priority.addValue("HIGH");
 			list.put(priority);
 
 			// Medium type
-			Attribute medium = new CodeStringAttribute(TagFromName.MediumType);
+			Attribute medium = new CodeStringAttribute(MediumType);
 			medium.addValue("BLUE FILM");
 			list.put(medium);
 
 			// Film destination
-			Attribute destination = new CodeStringAttribute(TagFromName.FilmDestination);
+			Attribute destination = new CodeStringAttribute(FilmDestination);
 			destination.addValue("MAGAZINE");
 			list.put(destination);
 

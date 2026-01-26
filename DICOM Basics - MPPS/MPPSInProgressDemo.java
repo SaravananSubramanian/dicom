@@ -6,17 +6,18 @@ import java.util.LinkedList;
 
 import com.pixelmed.dicom.Attribute;
 import com.pixelmed.dicom.AttributeList;
+import com.pixelmed.dicom.AttributeTag;
 import com.pixelmed.dicom.CodeStringAttribute;
 import com.pixelmed.dicom.DateAttribute;
 import com.pixelmed.dicom.IntegerStringAttribute;
 import com.pixelmed.dicom.LongStringAttribute;
 import com.pixelmed.dicom.PersonNameAttribute;
-import com.pixelmed.dicom.SOPClass;
 import com.pixelmed.dicom.SequenceAttribute;
 import com.pixelmed.dicom.ShortStringAttribute;
 import com.pixelmed.dicom.TagFromName;
 import com.pixelmed.dicom.TimeAttribute;
 import com.pixelmed.dicom.TransferSyntax;
+import com.pixelmed.dicom.UIDGenerator;
 import com.pixelmed.dicom.UniqueIdentifierAttribute;
 import com.pixelmed.network.Association;
 import com.pixelmed.network.AssociationFactory;
@@ -48,6 +49,15 @@ import com.pixelmed.network.PresentationContext;
  */
 public class MPPSInProgressDemo {
 
+	// Define missing DICOM constants
+	private static final String ModalityPerformedProcedureStepSOPClass = "1.2.840.10008.3.1.2.3.3";
+	private static final AttributeTag ScheduledProcedureStepID = new AttributeTag(0x0040, 0x0009);
+	private static final AttributeTag PerformedSeriesSequence = new AttributeTag(0x0040, 0x0340);
+	private static final AttributeTag PerformedProcedureStepStatus = new AttributeTag(0x0040, 0x0252);
+	private static final AttributeTag PerformedStationAETitle = new AttributeTag(0x0040, 0x0241);
+	private static final AttributeTag PerformedStationName = new AttributeTag(0x0040, 0x0242);
+	private static final AttributeTag ScheduledStepAttributesSequence = new AttributeTag(0x0040, 0x0270);
+
 	public static void main(String[] args) {
 
 		try {
@@ -61,7 +71,7 @@ public class MPPSInProgressDemo {
 			String localAETitle = "MPPSSCU";
 
 			// Generate a unique SOP Instance UID for this MPPS instance
-			String mppsSOPInstanceUID = UniqueIdentifierAttribute.createUID();
+			String mppsSOPInstanceUID = new UIDGenerator().getNewUID();
 
 			System.out.println("Creating MPPS with SOP Instance UID: " + mppsSOPInstanceUID);
 
@@ -78,13 +88,13 @@ public class MPPSInProgressDemo {
 
 			presentationContexts.add(new PresentationContext(
 				(byte) 0x01,
-				SOPClass.ModalityPerformedProcedureStepSOPClass,
+				ModalityPerformedProcedureStepSOPClass,
 				TransferSyntax.ImplicitVRLittleEndian
 			));
 
 			presentationContexts.add(new PresentationContext(
 				(byte) 0x03,
-				SOPClass.ModalityPerformedProcedureStepSOPClass,
+				ModalityPerformedProcedureStepSOPClass,
 				TransferSyntax.ExplicitVRLittleEndian
 			));
 
@@ -98,8 +108,6 @@ public class MPPSInProgressDemo {
 				presentationContexts,
 				null,
 				false,
-				null,
-				0,
 				0
 			);
 
@@ -111,7 +119,7 @@ public class MPPSInProgressDemo {
 
 				System.out.println("\n--- MPPS N-CREATE Request Built ---");
 				System.out.println("Would send N-CREATE with:");
-				System.out.println("  Affected SOP Class: " + SOPClass.ModalityPerformedProcedureStepSOPClass);
+				System.out.println("  Affected SOP Class: " + ModalityPerformedProcedureStepSOPClass);
 				System.out.println("  Affected SOP Instance: " + mppsSOPInstanceUID);
 
 				// Print the full attribute list for debugging
@@ -158,7 +166,7 @@ public class MPPSInProgressDemo {
 		list.put(ppsStartTime);
 
 		// Status MUST be "IN PROGRESS" for N-CREATE
-		Attribute ppsStatus = new CodeStringAttribute(TagFromName.PerformedProcedureStepStatus);
+		Attribute ppsStatus = new CodeStringAttribute(PerformedProcedureStepStatus);
 		ppsStatus.addValue("IN PROGRESS");
 		list.put(ppsStatus);
 
@@ -175,11 +183,11 @@ public class MPPSInProgressDemo {
 		modality.addValue("CT");
 		list.put(modality);
 
-		Attribute stationAE = new ShortStringAttribute(TagFromName.PerformedStationAETitle);
+		Attribute stationAE = new ShortStringAttribute(PerformedStationAETitle);
 		stationAE.addValue("CT_SCANNER_1");
 		list.put(stationAE);
 
-		Attribute stationName = new ShortStringAttribute(TagFromName.PerformedStationName);
+		Attribute stationName = new ShortStringAttribute(PerformedStationName);
 		stationName.addValue("CT Room 1");
 		list.put(stationName);
 
@@ -202,7 +210,7 @@ public class MPPSInProgressDemo {
 
 		// === Study Information ===
 		Attribute studyInstanceUID = new UniqueIdentifierAttribute(TagFromName.StudyInstanceUID);
-		studyInstanceUID.addValue(UniqueIdentifierAttribute.createUID());
+		studyInstanceUID.addValue(new UIDGenerator().getNewUID());
 		list.put(studyInstanceUID);
 
 		Attribute studyID = new ShortStringAttribute(TagFromName.StudyID);
@@ -215,7 +223,7 @@ public class MPPSInProgressDemo {
 
 		// === Scheduled Step Attributes Sequence ===
 		// Links this MPPS to the original worklist item
-		SequenceAttribute scheduledStepSeq = new SequenceAttribute(TagFromName.ScheduledStepAttributesSequence);
+		SequenceAttribute scheduledStepSeq = new SequenceAttribute(ScheduledStepAttributesSequence);
 		AttributeList scheduledStepItem = new AttributeList();
 
 		Attribute accessionNumber = new ShortStringAttribute(TagFromName.AccessionNumber);
@@ -226,7 +234,7 @@ public class MPPSInProgressDemo {
 		requestedProcedureID.addValue("REQ001");
 		scheduledStepItem.put(requestedProcedureID);
 
-		Attribute scheduledProcedureStepID = new ShortStringAttribute(TagFromName.ScheduledProcedureStepID);
+		Attribute scheduledProcedureStepID = new ShortStringAttribute(ScheduledProcedureStepID);
 		scheduledProcedureStepID.addValue("SPS001");
 		scheduledStepItem.put(scheduledProcedureStepID);
 
@@ -236,7 +244,7 @@ public class MPPSInProgressDemo {
 		list.put(scheduledStepSeq);
 
 		// === Performed Series Sequence (empty for IN PROGRESS) ===
-		list.put(new SequenceAttribute(TagFromName.PerformedSeriesSequence));
+		list.put(new SequenceAttribute(PerformedSeriesSequence));
 
 		return list;
 	}

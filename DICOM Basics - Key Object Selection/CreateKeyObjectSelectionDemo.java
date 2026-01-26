@@ -19,6 +19,7 @@ import com.pixelmed.dicom.StructuredReport;
 import com.pixelmed.dicom.TagFromName;
 import com.pixelmed.dicom.TimeAttribute;
 import com.pixelmed.dicom.TransferSyntax;
+import com.pixelmed.dicom.UIDGenerator;
 import com.pixelmed.dicom.UniqueIdentifierAttribute;
 
 /**
@@ -114,7 +115,7 @@ public class CreateKeyObjectSelectionDemo {
 		list.put(sopClass);
 
 		Attribute sopInstance = new UniqueIdentifierAttribute(TagFromName.SOPInstanceUID);
-		sopInstance.addValue(UniqueIdentifierAttribute.createUID());
+		sopInstance.addValue(new UIDGenerator().getNewUID());
 		list.put(sopInstance);
 
 		// === Patient Module ===
@@ -166,7 +167,7 @@ public class CreateKeyObjectSelectionDemo {
 		list.put(modality);
 
 		Attribute seriesInstanceUID = new UniqueIdentifierAttribute(TagFromName.SeriesInstanceUID);
-		seriesInstanceUID.addValue(UniqueIdentifierAttribute.createUID());
+		seriesInstanceUID.addValue(new UIDGenerator().getNewUID());
 		list.put(seriesInstanceUID);
 
 		Attribute seriesNumber = new IntegerStringAttribute(TagFromName.SeriesNumber);
@@ -215,6 +216,7 @@ public class CreateKeyObjectSelectionDemo {
 			String classUID = image[3];
 
 			// Create IMAGE content item referencing the selected image
+			// Using the 11-parameter constructor available in PixelMed
 			ContentItem imageRef = cif.new ImageContentItem(
 				root,
 				"CONTAINS",
@@ -223,8 +225,10 @@ public class CreateKeyObjectSelectionDemo {
 				instanceUID, // Referenced SOP Instance UID
 				0, // Referenced Frame Number (0 for all frames)
 				0, // Referenced Segment Number
-				null, // Presentation State SOP Class
-				null  // Presentation State SOP Instance
+				null, // Presentation State SOP Class UID
+				null, // Presentation State SOP Instance UID
+				null, // Real World Value Mapping SOP Class UID
+				null  // Real World Value Mapping SOP Instance UID
 			);
 		}
 

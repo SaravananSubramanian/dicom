@@ -1,12 +1,7 @@
 package com.saravanansubramanian.dicom.pixelmedtutorial;
 
-import java.io.FileInputStream;
-import java.security.KeyStore;
+import java.io.File;
 import java.util.LinkedList;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
 
 import com.pixelmed.dicom.TransferSyntax;
 import com.pixelmed.network.Association;
@@ -48,11 +43,10 @@ public class DicomTlsConnectionDemo {
 
 			System.out.println("=== DICOM TLS Connection Demo ===\n");
 
-			// TLS Configuration
+			// TLS Configuration - PixelMed uses keystore paths directly
+			// The keystore should contain both our certificate and trusted CA certs
 			String keystorePath = "C:\\path\\to\\keystore.jks";
 			String keystorePassword = "changeit";
-			String truststorePath = "C:\\path\\to\\truststore.jks";
-			String truststorePassword = "changeit";
 
 			// Remote server (must support TLS)
 			String remoteHost = "localhost";
@@ -60,29 +54,16 @@ public class DicomTlsConnectionDemo {
 			String remoteAETitle = "SECURE_PACS";
 			String localAETitle = "SECURE_CLIENT";
 
-			System.out.println("Setting up TLS context...");
+			// Check if keystore exists
+			File keystoreFile = new File(keystorePath);
+			if (!keystoreFile.exists()) {
+				System.out.println("Note: Update 'keystorePath' with actual keystore file.");
+				System.out.println("Keystore not found at: " + keystorePath);
+				demonstrateTlsConcepts();
+				return;
+			}
 
-			// Load keystore (contains our private key and certificate)
-			KeyStore keyStore = KeyStore.getInstance("JKS");
-			keyStore.load(new FileInputStream(keystorePath), keystorePassword.toCharArray());
-
-			// Load truststore (contains CA certificates we trust)
-			KeyStore trustStore = KeyStore.getInstance("JKS");
-			trustStore.load(new FileInputStream(truststorePath), truststorePassword.toCharArray());
-
-			// Initialize key manager
-			KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-			kmf.init(keyStore, keystorePassword.toCharArray());
-
-			// Initialize trust manager
-			TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-			tmf.init(trustStore);
-
-			// Create SSL context
-			SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-			sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-
-			System.out.println("TLS context initialized with TLSv1.2");
+			System.out.println("Using keystore: " + keystorePath);
 
 			// Build presentation contexts for C-ECHO
 			LinkedList<PresentationContext> presentationContexts = new LinkedList<>();
@@ -94,20 +75,19 @@ public class DicomTlsConnectionDemo {
 
 			System.out.println("\nAttempting secure connection to " + remoteHost + ":" + remotePort + "...");
 
-			// Create secure association
-			// Note: PixelMed's AssociationFactory can accept SSL socket factory
-			// The exact API may vary by version
+			// Create secure association using PixelMed's TLS support
+			// PixelMed handles TLS internally when secure=true and keystore is provided
 			Association association = AssociationFactory.createNewAssociation(
 				remoteHost,
 				remotePort,
 				remoteAETitle,
 				localAETitle,
 				presentationContexts,
-				null,  // user identity
+				null,  // user identity negotiation items
 				true,  // secure = true for TLS
-				sslContext,
-				0,     // timeout
-				0      // pdu timeout
+				keystorePath,
+				keystorePassword,
+				0      // debug level
 			);
 
 			if (association != null) {

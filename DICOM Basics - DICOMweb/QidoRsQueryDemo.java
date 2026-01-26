@@ -120,15 +120,15 @@ public class QidoRsQueryDemo {
 			System.out.println("Response Code: " + responseCode);
 
 			if (responseCode == 200) {
-				BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-				StringBuilder response = new StringBuilder();
-				String line;
-				while ((line = reader.readLine()) != null) {
-					response.append(line);
+				String jsonResponse;
+				try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+					StringBuilder response = new StringBuilder();
+					String line;
+					while ((line = reader.readLine()) != null) {
+						response.append(line);
+					}
+					jsonResponse = response.toString();
 				}
-				reader.close();
-
-				String jsonResponse = response.toString();
 				System.out.println("Response length: " + jsonResponse.length() + " chars");
 
 				// Pretty print first part of response
@@ -165,15 +165,14 @@ public class QidoRsQueryDemo {
 			System.out.println("Response Code: " + responseCode);
 
 			if (responseCode == 200) {
-				BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-				StringBuilder response = new StringBuilder();
-				String line;
-				while ((line = reader.readLine()) != null) {
-					response.append(line);
+				try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+					StringBuilder response = new StringBuilder();
+					String line;
+					while ((line = reader.readLine()) != null) {
+						response.append(line);
+					}
+					System.out.println("Response length: " + response.length() + " chars");
 				}
-				reader.close();
-
-				System.out.println("Response length: " + response.length() + " chars");
 			} else {
 				System.out.println("Error: " + conn.getResponseMessage());
 			}
@@ -203,15 +202,14 @@ public class QidoRsQueryDemo {
 			System.out.println("Response Code: " + responseCode);
 
 			if (responseCode == 200) {
-				BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-				StringBuilder response = new StringBuilder();
-				String line;
-				while ((line = reader.readLine()) != null) {
-					response.append(line);
+				try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+					StringBuilder response = new StringBuilder();
+					String line;
+					while ((line = reader.readLine()) != null) {
+						response.append(line);
+					}
+					System.out.println("Response length: " + response.length() + " chars");
 				}
-				reader.close();
-
-				System.out.println("Response length: " + response.length() + " chars");
 			} else {
 				System.out.println("Error: " + conn.getResponseMessage());
 			}

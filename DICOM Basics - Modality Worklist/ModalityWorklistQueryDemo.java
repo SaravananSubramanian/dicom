@@ -5,8 +5,8 @@ import com.pixelmed.dicom.AttributeList;
 import com.pixelmed.dicom.AttributeTag;
 import com.pixelmed.dicom.CodeStringAttribute;
 import com.pixelmed.dicom.DicomException;
-import com.pixelmed.dicom.SOPClass;
 import com.pixelmed.dicom.SequenceAttribute;
+import com.pixelmed.dicom.SequenceItem;
 import com.pixelmed.dicom.SpecificCharacterSet;
 import com.pixelmed.dicom.TagFromName;
 import com.pixelmed.network.FindSOPClassSCU;
@@ -34,6 +34,14 @@ import com.pixelmed.network.IdentifierHandler;
  */
 public class ModalityWorklistQueryDemo {
 
+	// Define missing DICOM tags that are not in TagFromName
+	private static final AttributeTag ScheduledProcedureStepSequence = new AttributeTag(0x0040, 0x0100);
+	private static final AttributeTag ScheduledProcedureStepID = new AttributeTag(0x0040, 0x0009);
+	private static final AttributeTag RequestedProcedurePriority = new AttributeTag(0x0040, 0x1003);
+
+	// Modality Worklist Information Model - FIND SOP Class UID
+	private static final String ModalityWorklistInformationModelFind = "1.2.840.10008.5.1.4.31";
+
 	public static void main(String[] args) {
 
 		try {
@@ -60,11 +68,11 @@ public class ModalityWorklistQueryDemo {
 			// === Requested Procedure attributes ===
 			identifier.putNewAttribute(TagFromName.RequestedProcedureID, specificCharacterSet);
 			identifier.putNewAttribute(TagFromName.RequestedProcedureDescription, specificCharacterSet);
-			identifier.putNewAttribute(TagFromName.RequestedProcedurePriority, specificCharacterSet);
+			identifier.putNewAttribute(RequestedProcedurePriority, specificCharacterSet);
 
 			// === Scheduled Procedure Step Sequence (critical for MWL) ===
 			// This sequence contains the scheduling information
-			SequenceAttribute scheduledProcedureStepSequence = new SequenceAttribute(TagFromName.ScheduledProcedureStepSequence);
+			SequenceAttribute scheduledProcedureStepSequence = new SequenceAttribute(ScheduledProcedureStepSequence);
 			AttributeList scheduledProcedureStepItem = new AttributeList();
 
 			// Add attributes to query within the sequence
@@ -73,7 +81,7 @@ public class ModalityWorklistQueryDemo {
 			scheduledProcedureStepItem.putNewAttribute(TagFromName.ScheduledProcedureStepStartTime);
 			scheduledProcedureStepItem.putNewAttribute(TagFromName.ScheduledPerformingPhysicianName, specificCharacterSet);
 			scheduledProcedureStepItem.putNewAttribute(TagFromName.ScheduledProcedureStepDescription, specificCharacterSet);
-			scheduledProcedureStepItem.putNewAttribute(TagFromName.ScheduledProcedureStepID, specificCharacterSet);
+			scheduledProcedureStepItem.putNewAttribute(ScheduledProcedureStepID, specificCharacterSet);
 			scheduledProcedureStepItem.putNewAttribute(TagFromName.ScheduledProcedureStepLocation, specificCharacterSet);
 
 			// Filter by modality (e.g., CT, MR, US, XA, etc.)
@@ -104,7 +112,7 @@ public class ModalityWorklistQueryDemo {
 				4242,                                                 // port
 				"ORTHANC",                                           // called AE title
 				"WORKLISTSCU",                                       // calling AE title
-				SOPClass.ModalityWorklistInformationModelFind,       // MWL SOP Class
+				ModalityWorklistInformationModelFind,                // MWL SOP Class
 				identifier,                                          // query attributes
 				new WorklistResponseHandler()                        // response handler
 			);
@@ -150,11 +158,12 @@ class WorklistResponseHandler extends IdentifierHandler {
 		System.out.println("Requested Procedure: " + requestedProcedure);
 
 		// Extract scheduled procedure step information from sequence
-		Attribute spsSequenceAttr = responseIdentifier.get(TagFromName.ScheduledProcedureStepSequence);
+		AttributeTag spsSeqTag = new AttributeTag(0x0040, 0x0100); // ScheduledProcedureStepSequence
+		Attribute spsSequenceAttr = responseIdentifier.get(spsSeqTag);
 		if (spsSequenceAttr != null && spsSequenceAttr instanceof SequenceAttribute) {
 			SequenceAttribute spsSequence = (SequenceAttribute) spsSequenceAttr;
 			if (spsSequence.getNumberOfItems() > 0) {
-				AttributeList spsItem = spsSequence.getItem(0);
+				AttributeList spsItem = spsSequence.getItem(0).getAttributeList();
 
 				String scheduledDate = getAttributeValue(spsItem, TagFromName.ScheduledProcedureStepStartDate);
 				String scheduledTime = getAttributeValue(spsItem, TagFromName.ScheduledProcedureStepStartTime);

@@ -5,6 +5,7 @@ import java.util.Date;
 
 import com.pixelmed.dicom.Attribute;
 import com.pixelmed.dicom.AttributeList;
+import com.pixelmed.dicom.AttributeTag;
 import com.pixelmed.dicom.CodeStringAttribute;
 import com.pixelmed.dicom.DateAttribute;
 import com.pixelmed.dicom.DecimalStringAttribute;
@@ -19,6 +20,7 @@ import com.pixelmed.dicom.ShortStringAttribute;
 import com.pixelmed.dicom.TagFromName;
 import com.pixelmed.dicom.TimeAttribute;
 import com.pixelmed.dicom.TransferSyntax;
+import com.pixelmed.dicom.UIDGenerator;
 import com.pixelmed.dicom.UniqueIdentifierAttribute;
 import com.pixelmed.dicom.UnsignedLongAttribute;
 import com.pixelmed.dicom.UnsignedShortAttribute;
@@ -43,6 +45,10 @@ import com.pixelmed.dicom.UnsignedShortAttribute;
  * For more information: http://www.saravanansubramanian.com
  */
 public class CreateEcgWaveformDemo {
+
+	// Missing DICOM tags
+	private static final AttributeTag WaveformSampleInterpretation = new AttributeTag(0x5400, 0x1006);
+	private static final AttributeTag ChannelBaseline = new AttributeTag(0x5400, 0x0114);
 
 	public static void main(String[] args) {
 
@@ -111,7 +117,7 @@ public class CreateEcgWaveformDemo {
 		list.put(sopClass);
 
 		Attribute sopInstance = new UniqueIdentifierAttribute(TagFromName.SOPInstanceUID);
-		sopInstance.addValue(UniqueIdentifierAttribute.createUID());
+		sopInstance.addValue(new UIDGenerator().getNewUID());
 		list.put(sopInstance);
 
 		// === Patient Module ===
@@ -133,7 +139,7 @@ public class CreateEcgWaveformDemo {
 
 		// === General Study Module ===
 		Attribute studyUID = new UniqueIdentifierAttribute(TagFromName.StudyInstanceUID);
-		studyUID.addValue(UniqueIdentifierAttribute.createUID());
+		studyUID.addValue(new UIDGenerator().getNewUID());
 		list.put(studyUID);
 
 		Attribute studyDate = new DateAttribute(TagFromName.StudyDate);
@@ -158,7 +164,7 @@ public class CreateEcgWaveformDemo {
 		list.put(modality);
 
 		Attribute seriesUID = new UniqueIdentifierAttribute(TagFromName.SeriesInstanceUID);
-		seriesUID.addValue(UniqueIdentifierAttribute.createUID());
+		seriesUID.addValue(new UIDGenerator().getNewUID());
 		list.put(seriesUID);
 
 		Attribute seriesNumber = new IntegerStringAttribute(TagFromName.SeriesNumber);
@@ -208,7 +214,7 @@ public class CreateEcgWaveformDemo {
 		waveformItem.put(bitsAlloc);
 
 		// Waveform sample interpretation
-		Attribute sampleInterp = new CodeStringAttribute(TagFromName.WaveformSampleInterpretation);
+		Attribute sampleInterp = new CodeStringAttribute(WaveformSampleInterpretation);
 		sampleInterp.addValue("SS"); // Signed Short
 		waveformItem.put(sampleInterp);
 
@@ -255,7 +261,7 @@ public class CreateEcgWaveformDemo {
 			channelItem.put(sensUnitsSeq);
 
 			// Channel baseline
-			Attribute baseline = new IntegerStringAttribute(TagFromName.ChannelBaseline);
+			Attribute baseline = new IntegerStringAttribute(ChannelBaseline);
 			baseline.addValue("0");
 			channelItem.put(baseline);
 

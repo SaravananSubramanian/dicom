@@ -84,10 +84,10 @@ public class StowRsStoreDemo {
 
 			// Read DICOM file
 			File file = new File(dicomFilePath);
-			FileInputStream fis = new FileInputStream(file);
 			byte[] fileBytes = new byte[(int) file.length()];
-			fis.read(fileBytes);
-			fis.close();
+			try (FileInputStream fis = new FileInputStream(file)) {
+				fis.read(fileBytes);
+			}
 
 			// Build multipart request body
 			DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
@@ -111,29 +111,28 @@ public class StowRsStoreDemo {
 			System.out.println("Response Code: " + responseCode);
 
 			if (responseCode == 200 || responseCode == 202) {
-				InputStream is = conn.getInputStream();
-				byte[] buffer = new byte[4096];
-				StringBuilder response = new StringBuilder();
-				int bytesRead;
-				while ((bytesRead = is.read(buffer)) != -1) {
-					response.append(new String(buffer, 0, bytesRead));
+				try (InputStream is = conn.getInputStream()) {
+					byte[] buffer = new byte[4096];
+					StringBuilder response = new StringBuilder();
+					int bytesRead;
+					while ((bytesRead = is.read(buffer)) != -1) {
+						response.append(new String(buffer, 0, bytesRead));
+					}
+					System.out.println("Store successful!");
+					System.out.println("Response: " + response.toString());
 				}
-				is.close();
-
-				System.out.println("Store successful!");
-				System.out.println("Response: " + response.toString());
 			} else {
 				System.out.println("Error: " + conn.getResponseMessage());
-				InputStream es = conn.getErrorStream();
-				if (es != null) {
-					byte[] buffer = new byte[4096];
-					StringBuilder error = new StringBuilder();
-					int bytesRead;
-					while ((bytesRead = es.read(buffer)) != -1) {
-						error.append(new String(buffer, 0, bytesRead));
+				try (InputStream es = conn.getErrorStream()) {
+					if (es != null) {
+						byte[] buffer = new byte[4096];
+						StringBuilder error = new StringBuilder();
+						int bytesRead;
+						while ((bytesRead = es.read(buffer)) != -1) {
+							error.append(new String(buffer, 0, bytesRead));
+						}
+						System.out.println("Error details: " + error.toString());
 					}
-					es.close();
-					System.out.println("Error details: " + error.toString());
 				}
 			}
 
@@ -173,10 +172,10 @@ public class StowRsStoreDemo {
 					continue;
 				}
 
-				FileInputStream fis = new FileInputStream(file);
 				byte[] fileBytes = new byte[(int) file.length()];
-				fis.read(fileBytes);
-				fis.close();
+				try (FileInputStream fis = new FileInputStream(file)) {
+					fis.read(fileBytes);
+				}
 
 				dos.writeBytes("--" + boundary + "\r\n");
 				dos.writeBytes("Content-Type: application/dicom\r\n");

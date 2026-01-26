@@ -18,6 +18,7 @@ import com.pixelmed.dicom.SequenceAttribute;
 import com.pixelmed.dicom.ShortStringAttribute;
 import com.pixelmed.dicom.TagFromName;
 import com.pixelmed.dicom.TransferSyntax;
+import com.pixelmed.dicom.UIDGenerator;
 import com.pixelmed.dicom.UniqueIdentifierAttribute;
 
 /**
@@ -196,7 +197,7 @@ public class DicomAnonymizationDemo {
 			if (originalUID != null) {
 				String newUID = uidMap.get(originalUID);
 				if (newUID == null) {
-					newUID = UniqueIdentifierAttribute.createUID();
+					newUID = new UIDGenerator().getNewUID();
 					uidMap.put(originalUID, newUID);
 				}
 

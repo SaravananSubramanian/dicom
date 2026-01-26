@@ -6,6 +6,7 @@ import java.util.LinkedList;
 
 import com.pixelmed.dicom.Attribute;
 import com.pixelmed.dicom.AttributeList;
+import com.pixelmed.dicom.AttributeTag;
 import com.pixelmed.dicom.CodeStringAttribute;
 import com.pixelmed.dicom.DateAttribute;
 import com.pixelmed.dicom.IntegerStringAttribute;
@@ -16,6 +17,7 @@ import com.pixelmed.dicom.ShortStringAttribute;
 import com.pixelmed.dicom.TagFromName;
 import com.pixelmed.dicom.TimeAttribute;
 import com.pixelmed.dicom.TransferSyntax;
+import com.pixelmed.dicom.UIDGenerator;
 import com.pixelmed.dicom.UniqueIdentifierAttribute;
 import com.pixelmed.network.Association;
 import com.pixelmed.network.AssociationFactory;
@@ -39,6 +41,14 @@ import com.pixelmed.network.PresentationContext;
  * For more information: http://www.saravanansubramanian.com
  */
 public class MPPSCompletedDemo {
+
+	// Define missing DICOM constants
+	private static final String ModalityPerformedProcedureStepSOPClass = "1.2.840.10008.3.1.2.3.3";
+	private static final AttributeTag PerformedProcedureStepEndDate = new AttributeTag(0x0040, 0x0250);
+	private static final AttributeTag PerformedProcedureStepEndTime = new AttributeTag(0x0040, 0x0251);
+	private static final AttributeTag PerformedProcedureStepStatus = new AttributeTag(0x0040, 0x0252);
+	private static final AttributeTag PerformedSeriesSequence = new AttributeTag(0x0040, 0x0340);
+	private static final AttributeTag ReferencedNonImageCompositeSOPInstanceSequence = new AttributeTag(0x0040, 0x0220);
 
 	public static void main(String[] args) {
 
@@ -70,13 +80,13 @@ public class MPPSCompletedDemo {
 
 			presentationContexts.add(new PresentationContext(
 				(byte) 0x01,
-				SOPClass.ModalityPerformedProcedureStepSOPClass,
+				ModalityPerformedProcedureStepSOPClass,
 				TransferSyntax.ImplicitVRLittleEndian
 			));
 
 			presentationContexts.add(new PresentationContext(
 				(byte) 0x03,
-				SOPClass.ModalityPerformedProcedureStepSOPClass,
+				ModalityPerformedProcedureStepSOPClass,
 				TransferSyntax.ExplicitVRLittleEndian
 			));
 
@@ -90,8 +100,6 @@ public class MPPSCompletedDemo {
 				presentationContexts,
 				null,
 				false,
-				null,
-				0,
 				0
 			);
 
@@ -100,7 +108,7 @@ public class MPPSCompletedDemo {
 
 				System.out.println("\n--- MPPS N-SET Request Built ---");
 				System.out.println("Would send N-SET with:");
-				System.out.println("  Requested SOP Class: " + SOPClass.ModalityPerformedProcedureStepSOPClass);
+				System.out.println("  Requested SOP Class: " + ModalityPerformedProcedureStepSOPClass);
 				System.out.println("  Requested SOP Instance: " + mppsSOPInstanceUID);
 
 				// Print the full attribute list
@@ -137,27 +145,27 @@ public class MPPSCompletedDemo {
 		String currentTime = timeFormat.format(now);
 
 		// === Performed Procedure Step End Information ===
-		Attribute ppsEndDate = new DateAttribute(TagFromName.PerformedProcedureStepEndDate);
+		Attribute ppsEndDate = new DateAttribute(PerformedProcedureStepEndDate);
 		ppsEndDate.addValue(currentDate);
 		list.put(ppsEndDate);
 
-		Attribute ppsEndTime = new TimeAttribute(TagFromName.PerformedProcedureStepEndTime);
+		Attribute ppsEndTime = new TimeAttribute(PerformedProcedureStepEndTime);
 		ppsEndTime.addValue(currentTime);
 		list.put(ppsEndTime);
 
 		// Status changes to "COMPLETED" (or "DISCONTINUED" if aborted)
-		Attribute ppsStatus = new CodeStringAttribute(TagFromName.PerformedProcedureStepStatus);
+		Attribute ppsStatus = new CodeStringAttribute(PerformedProcedureStepStatus);
 		ppsStatus.addValue("COMPLETED");
 		list.put(ppsStatus);
 
 		// === Performed Series Sequence ===
 		// This tells the RIS/PACS what was actually acquired
-		SequenceAttribute performedSeriesSeq = new SequenceAttribute(TagFromName.PerformedSeriesSequence);
+		SequenceAttribute performedSeriesSeq = new SequenceAttribute(PerformedSeriesSequence);
 		AttributeList seriesItem = new AttributeList();
 
 		// Series information
 		Attribute seriesInstanceUID = new UniqueIdentifierAttribute(TagFromName.SeriesInstanceUID);
-		seriesInstanceUID.addValue(UniqueIdentifierAttribute.createUID());
+		seriesInstanceUID.addValue(new UIDGenerator().getNewUID());
 		seriesItem.put(seriesInstanceUID);
 
 		Attribute seriesDescription = new LongStringAttribute(TagFromName.SeriesDescription);
@@ -188,7 +196,7 @@ public class MPPSCompletedDemo {
 			imageItem.put(refSOPClass);
 
 			Attribute refSOPInstance = new UniqueIdentifierAttribute(TagFromName.ReferencedSOPInstanceUID);
-			refSOPInstance.addValue(UniqueIdentifierAttribute.createUID());
+			refSOPInstance.addValue(new UIDGenerator().getNewUID());
 			imageItem.put(refSOPInstance);
 
 			refImageSeq.addItem(imageItem);
@@ -197,7 +205,7 @@ public class MPPSCompletedDemo {
 		seriesItem.put(refImageSeq);
 
 		// === Referenced Non-Image Composite SOP Instance Sequence (e.g., dose reports) ===
-		seriesItem.put(new SequenceAttribute(TagFromName.ReferencedNonImageCompositeSOPInstanceSequence));
+		seriesItem.put(new SequenceAttribute(ReferencedNonImageCompositeSOPInstanceSequence));
 
 		performedSeriesSeq.addItem(seriesItem);
 		list.put(performedSeriesSeq);

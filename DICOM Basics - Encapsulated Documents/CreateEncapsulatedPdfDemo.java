@@ -19,6 +19,7 @@ import com.pixelmed.dicom.ShortStringAttribute;
 import com.pixelmed.dicom.TagFromName;
 import com.pixelmed.dicom.TimeAttribute;
 import com.pixelmed.dicom.TransferSyntax;
+import com.pixelmed.dicom.UIDGenerator;
 import com.pixelmed.dicom.UniqueIdentifierAttribute;
 
 /**
@@ -131,7 +132,7 @@ public class CreateEncapsulatedPdfDemo {
 		list.put(sopClass);
 
 		Attribute sopInstance = new UniqueIdentifierAttribute(TagFromName.SOPInstanceUID);
-		sopInstance.addValue(UniqueIdentifierAttribute.createUID());
+		sopInstance.addValue(new UIDGenerator().getNewUID());
 		list.put(sopInstance);
 
 		// === Patient Module ===
@@ -182,7 +183,7 @@ public class CreateEncapsulatedPdfDemo {
 		list.put(modalityAttr);
 
 		Attribute seriesUIDAttr = new UniqueIdentifierAttribute(TagFromName.SeriesInstanceUID);
-		seriesUIDAttr.addValue(UniqueIdentifierAttribute.createUID());
+		seriesUIDAttr.addValue(new UIDGenerator().getNewUID());
 		list.put(seriesUIDAttr);
 
 		Attribute seriesNumAttr = new IntegerStringAttribute(TagFromName.SeriesNumber);
@@ -240,9 +241,9 @@ public class CreateEncapsulatedPdfDemo {
 	private static byte[] readFileBytes(String filePath) throws Exception {
 		File file = new File(filePath);
 		byte[] data = new byte[(int) file.length()];
-		FileInputStream fis = new FileInputStream(file);
-		fis.read(data);
-		fis.close();
+		try (FileInputStream fis = new FileInputStream(file)) {
+			fis.read(data);
+		}
 		return data;
 	}
 

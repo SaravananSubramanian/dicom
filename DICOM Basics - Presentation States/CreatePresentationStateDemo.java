@@ -5,6 +5,7 @@ import java.util.Date;
 
 import com.pixelmed.dicom.Attribute;
 import com.pixelmed.dicom.AttributeList;
+import com.pixelmed.dicom.AttributeTag;
 import com.pixelmed.dicom.CodeStringAttribute;
 import com.pixelmed.dicom.DateAttribute;
 import com.pixelmed.dicom.DecimalStringAttribute;
@@ -18,6 +19,7 @@ import com.pixelmed.dicom.ShortStringAttribute;
 import com.pixelmed.dicom.TagFromName;
 import com.pixelmed.dicom.TimeAttribute;
 import com.pixelmed.dicom.TransferSyntax;
+import com.pixelmed.dicom.UIDGenerator;
 import com.pixelmed.dicom.UniqueIdentifierAttribute;
 import com.pixelmed.dicom.UnsignedShortAttribute;
 
@@ -43,6 +45,19 @@ import com.pixelmed.dicom.UnsignedShortAttribute;
  * For more information: http://www.saravanansubramanian.com
  */
 public class CreatePresentationStateDemo {
+
+	// Missing DICOM tags
+	private static final AttributeTag SoftcopyVOILUTSequence = new AttributeTag(0x0028, 0x3110);
+	private static final AttributeTag GraphicLayer = new AttributeTag(0x0070, 0x0002);
+	private static final AttributeTag TextObjectSequence = new AttributeTag(0x0070, 0x0008);
+	private static final AttributeTag BoundingBoxTopLeftHandCorner = new AttributeTag(0x0070, 0x0010);
+	private static final AttributeTag BoundingBoxBottomRightHandCorner = new AttributeTag(0x0070, 0x0011);
+	private static final AttributeTag UnformattedTextValue = new AttributeTag(0x0070, 0x0006);
+	private static final AttributeTag AnchorPoint = new AttributeTag(0x0070, 0x0014);
+	private static final AttributeTag AnchorPointAnnotationUnits = new AttributeTag(0x0070, 0x0004);
+	private static final AttributeTag GraphicLayerSequence = new AttributeTag(0x0070, 0x0060);
+	private static final AttributeTag GraphicLayerOrder = new AttributeTag(0x0070, 0x0062);
+	private static final AttributeTag GraphicLayerDescription = new AttributeTag(0x0070, 0x0068);
 
 	public static void main(String[] args) {
 
@@ -109,7 +124,7 @@ public class CreatePresentationStateDemo {
 		list.put(sopClass);
 
 		Attribute sopInstance = new UniqueIdentifierAttribute(TagFromName.SOPInstanceUID);
-		sopInstance.addValue(UniqueIdentifierAttribute.createUID());
+		sopInstance.addValue(new UIDGenerator().getNewUID());
 		list.put(sopInstance);
 
 		// === Patient Module (copied from referenced image) ===
@@ -130,7 +145,7 @@ public class CreatePresentationStateDemo {
 		list.put(createCode(TagFromName.Modality, "PR")); // Presentation State
 
 		Attribute psSeriesUID = new UniqueIdentifierAttribute(TagFromName.SeriesInstanceUID);
-		psSeriesUID.addValue(UniqueIdentifierAttribute.createUID());
+		psSeriesUID.addValue(new UIDGenerator().getNewUID());
 		list.put(psSeriesUID);
 
 		list.put(createInt(TagFromName.SeriesNumber, 100));
@@ -169,7 +184,7 @@ public class CreatePresentationStateDemo {
 		list.put(refSeriesSeq);
 
 		// === Softcopy VOI LUT Module (Window Width/Level) ===
-		SequenceAttribute voiLutSeq = new SequenceAttribute(TagFromName.SoftcopyVOILUTSequence);
+		SequenceAttribute voiLutSeq = new SequenceAttribute(SoftcopyVOILUTSequence);
 		AttributeList voiLutItem = new AttributeList();
 
 		// Reference the image this applies to
@@ -210,35 +225,35 @@ public class CreatePresentationStateDemo {
 		annotationItem.put(refImageSeq3);
 
 		// Graphic Layer
-		annotationItem.put(createCode(TagFromName.GraphicLayer, "LAYER1"));
+		annotationItem.put(createCode(GraphicLayer, "LAYER1"));
 
 		// Text Object Sequence
-		SequenceAttribute textObjectSeq = new SequenceAttribute(TagFromName.TextObjectSequence);
+		SequenceAttribute textObjectSeq = new SequenceAttribute(TextObjectSequence);
 		AttributeList textItem = new AttributeList();
 
 		// Bounding box for text
-		Attribute boundingBoxTLHC = new DecimalStringAttribute(TagFromName.BoundingBoxTopLeftHandCorner);
+		Attribute boundingBoxTLHC = new DecimalStringAttribute(BoundingBoxTopLeftHandCorner);
 		boundingBoxTLHC.addValue("10");
 		boundingBoxTLHC.addValue("10");
 		textItem.put(boundingBoxTLHC);
 
-		Attribute boundingBoxBRHC = new DecimalStringAttribute(TagFromName.BoundingBoxBottomRightHandCorner);
+		Attribute boundingBoxBRHC = new DecimalStringAttribute(BoundingBoxBottomRightHandCorner);
 		boundingBoxBRHC.addValue("200");
 		boundingBoxBRHC.addValue("50");
 		textItem.put(boundingBoxBRHC);
 
 		// The text to display
-		Attribute unformattedText = new com.pixelmed.dicom.ShortTextAttribute(TagFromName.UnformattedTextValue);
+		Attribute unformattedText = new com.pixelmed.dicom.ShortTextAttribute(UnformattedTextValue);
 		unformattedText.addValue("Lung Window Preset");
 		textItem.put(unformattedText);
 
 		// Anchor point
-		Attribute anchorPoint = new DecimalStringAttribute(TagFromName.AnchorPoint);
+		Attribute anchorPoint = new DecimalStringAttribute(AnchorPoint);
 		anchorPoint.addValue("10");
 		anchorPoint.addValue("10");
 		textItem.put(anchorPoint);
 
-		textItem.put(createCode(TagFromName.AnchorPointAnnotationUnits, "PIXEL"));
+		textItem.put(createCode(AnchorPointAnnotationUnits, "PIXEL"));
 
 		textObjectSeq.addItem(textItem);
 		annotationItem.put(textObjectSeq);
@@ -247,12 +262,12 @@ public class CreatePresentationStateDemo {
 		list.put(graphicAnnotationSeq);
 
 		// === Graphic Layer Module ===
-		SequenceAttribute graphicLayerSeq = new SequenceAttribute(TagFromName.GraphicLayerSequence);
+		SequenceAttribute graphicLayerSeq = new SequenceAttribute(GraphicLayerSequence);
 		AttributeList layerItem = new AttributeList();
 
-		layerItem.put(createCode(TagFromName.GraphicLayer, "LAYER1"));
-		layerItem.put(createInt(TagFromName.GraphicLayerOrder, 1));
-		layerItem.put(createString(TagFromName.GraphicLayerDescription, LongStringAttribute.class,
+		layerItem.put(createCode(GraphicLayer, "LAYER1"));
+		layerItem.put(createInt(GraphicLayerOrder, 1));
+		layerItem.put(createString(GraphicLayerDescription, LongStringAttribute.class,
 			"Annotation layer"));
 
 		graphicLayerSeq.addItem(layerItem);

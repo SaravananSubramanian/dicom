@@ -4,7 +4,6 @@ import com.pixelmed.dicom.Attribute;
 import com.pixelmed.dicom.AttributeList;
 import com.pixelmed.dicom.AttributeTag;
 import com.pixelmed.dicom.DicomException;
-import com.pixelmed.dicom.SOPClass;
 import com.pixelmed.dicom.SequenceAttribute;
 import com.pixelmed.dicom.SpecificCharacterSet;
 import com.pixelmed.dicom.TagFromName;
@@ -27,6 +26,13 @@ import com.pixelmed.network.IdentifierHandler;
  * For more information: http://www.saravanansubramanian.com
  */
 public class ModalityWorklistQueryByPatientDemo {
+
+	// Define missing DICOM tags
+	private static final AttributeTag ScheduledProcedureStepSequence = new AttributeTag(0x0040, 0x0100);
+	private static final AttributeTag ScheduledProcedureStepID = new AttributeTag(0x0040, 0x0009);
+
+	// Modality Worklist Information Model - FIND SOP Class UID
+	private static final String ModalityWorklistInformationModelFind = "1.2.840.10008.5.1.4.31";
 
 	public static void main(String[] args) {
 
@@ -56,7 +62,7 @@ public class ModalityWorklistQueryByPatientDemo {
 			identifier.putNewAttribute(TagFromName.RequestedProcedureID, specificCharacterSet);
 
 			// === Scheduled Procedure Step Sequence ===
-			SequenceAttribute spsSequence = new SequenceAttribute(TagFromName.ScheduledProcedureStepSequence);
+			SequenceAttribute spsSequence = new SequenceAttribute(ScheduledProcedureStepSequence);
 			AttributeList spsItem = new AttributeList();
 
 			spsItem.putNewAttribute(TagFromName.Modality);
@@ -64,7 +70,7 @@ public class ModalityWorklistQueryByPatientDemo {
 			spsItem.putNewAttribute(TagFromName.ScheduledProcedureStepStartDate);
 			spsItem.putNewAttribute(TagFromName.ScheduledProcedureStepStartTime);
 			spsItem.putNewAttribute(TagFromName.ScheduledProcedureStepDescription, specificCharacterSet);
-			spsItem.putNewAttribute(TagFromName.ScheduledProcedureStepID, specificCharacterSet);
+			spsItem.putNewAttribute(ScheduledProcedureStepID, specificCharacterSet);
 
 			spsSequence.addItem(spsItem);
 			identifier.put(spsSequence);
@@ -76,7 +82,7 @@ public class ModalityWorklistQueryByPatientDemo {
 				4242,
 				"ORTHANC",
 				"WORKLISTSCU",
-				SOPClass.ModalityWorklistInformationModelFind,
+				ModalityWorklistInformationModelFind,
 				identifier,
 				new PatientWorklistHandler()
 			);
@@ -107,11 +113,12 @@ class PatientWorklistHandler extends IdentifierHandler {
 		printAttribute(response, "Procedure", TagFromName.RequestedProcedureDescription);
 
 		// Get scheduled details from sequence
-		Attribute seqAttr = response.get(TagFromName.ScheduledProcedureStepSequence);
+		AttributeTag spsTag = new AttributeTag(0x0040, 0x0100);
+		Attribute seqAttr = response.get(spsTag);
 		if (seqAttr instanceof SequenceAttribute) {
 			SequenceAttribute seq = (SequenceAttribute) seqAttr;
 			if (seq.getNumberOfItems() > 0) {
-				AttributeList item = seq.getItem(0);
+				AttributeList item = seq.getItem(0).getAttributeList();
 				printAttribute(item, "  Modality", TagFromName.Modality);
 				printAttribute(item, "  Date", TagFromName.ScheduledProcedureStepStartDate);
 				printAttribute(item, "  Time", TagFromName.ScheduledProcedureStepStartTime);

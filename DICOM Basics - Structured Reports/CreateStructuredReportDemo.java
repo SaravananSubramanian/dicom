@@ -18,6 +18,7 @@ import com.pixelmed.dicom.StructuredReport;
 import com.pixelmed.dicom.TagFromName;
 import com.pixelmed.dicom.TimeAttribute;
 import com.pixelmed.dicom.TransferSyntax;
+import com.pixelmed.dicom.UIDGenerator;
 import com.pixelmed.dicom.UniqueIdentifierAttribute;
 
 /**
@@ -95,7 +96,7 @@ public class CreateStructuredReportDemo {
 		list.put(sopClassUID);
 
 		Attribute sopInstanceUID = new UniqueIdentifierAttribute(TagFromName.SOPInstanceUID);
-		sopInstanceUID.addValue(UniqueIdentifierAttribute.createUID());
+		sopInstanceUID.addValue(new UIDGenerator().getNewUID());
 		list.put(sopInstanceUID);
 
 		// === Patient Module ===
@@ -117,7 +118,7 @@ public class CreateStructuredReportDemo {
 
 		// === General Study Module ===
 		Attribute studyInstanceUID = new UniqueIdentifierAttribute(TagFromName.StudyInstanceUID);
-		studyInstanceUID.addValue(UniqueIdentifierAttribute.createUID());
+		studyInstanceUID.addValue(new UIDGenerator().getNewUID());
 		list.put(studyInstanceUID);
 
 		Attribute studyDate = new DateAttribute(TagFromName.StudyDate);
@@ -146,7 +147,7 @@ public class CreateStructuredReportDemo {
 		list.put(modality);
 
 		Attribute seriesInstanceUID = new UniqueIdentifierAttribute(TagFromName.SeriesInstanceUID);
-		seriesInstanceUID.addValue(UniqueIdentifierAttribute.createUID());
+		seriesInstanceUID.addValue(new UIDGenerator().getNewUID());
 		list.put(seriesInstanceUID);
 
 		Attribute seriesNumber = new com.pixelmed.dicom.IntegerStringAttribute(TagFromName.SeriesNumber);

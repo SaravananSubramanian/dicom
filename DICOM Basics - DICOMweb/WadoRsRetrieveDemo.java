@@ -86,17 +86,18 @@ public class WadoRsRetrieveDemo {
 			System.out.println("Response Code: " + responseCode);
 
 			if (responseCode == 200) {
-				InputStream is = conn.getInputStream();
-				byte[] buffer = new byte[4096];
-				StringBuilder response = new StringBuilder();
-				int bytesRead;
-				while ((bytesRead = is.read(buffer)) != -1) {
-					response.append(new String(buffer, 0, bytesRead));
+				String jsonResponse;
+				try (InputStream is = conn.getInputStream()) {
+					byte[] buffer = new byte[4096];
+					StringBuilder response = new StringBuilder();
+					int bytesRead;
+					while ((bytesRead = is.read(buffer)) != -1) {
+						response.append(new String(buffer, 0, bytesRead));
+					}
+					jsonResponse = response.toString();
 				}
-				is.close();
 
 				// Print first 500 chars of response
-				String jsonResponse = response.toString();
 				if (jsonResponse.length() > 500) {
 					System.out.println("Response (truncated): " + jsonResponse.substring(0, 500) + "...");
 				} else {
@@ -133,19 +134,16 @@ public class WadoRsRetrieveDemo {
 			System.out.println("Response Code: " + responseCode);
 
 			if (responseCode == 200) {
-				InputStream is = conn.getInputStream();
-				FileOutputStream fos = new FileOutputStream(outputFile);
-
-				byte[] buffer = new byte[8192];
-				int bytesRead;
 				long totalBytes = 0;
-				while ((bytesRead = is.read(buffer)) != -1) {
-					fos.write(buffer, 0, bytesRead);
-					totalBytes += bytesRead;
+				try (InputStream is = conn.getInputStream();
+					 FileOutputStream fos = new FileOutputStream(outputFile)) {
+					byte[] buffer = new byte[8192];
+					int bytesRead;
+					while ((bytesRead = is.read(buffer)) != -1) {
+						fos.write(buffer, 0, bytesRead);
+						totalBytes += bytesRead;
+					}
 				}
-
-				fos.close();
-				is.close();
 				System.out.println("Saved to: " + outputFile + " (" + totalBytes + " bytes)");
 			} else {
 				System.out.println("Error: " + conn.getResponseMessage());
@@ -177,19 +175,16 @@ public class WadoRsRetrieveDemo {
 			System.out.println("Response Code: " + responseCode);
 
 			if (responseCode == 200) {
-				InputStream is = conn.getInputStream();
-				FileOutputStream fos = new FileOutputStream(outputFile);
-
-				byte[] buffer = new byte[8192];
-				int bytesRead;
 				long totalBytes = 0;
-				while ((bytesRead = is.read(buffer)) != -1) {
-					fos.write(buffer, 0, bytesRead);
-					totalBytes += bytesRead;
+				try (InputStream is = conn.getInputStream();
+					 FileOutputStream fos = new FileOutputStream(outputFile)) {
+					byte[] buffer = new byte[8192];
+					int bytesRead;
+					while ((bytesRead = is.read(buffer)) != -1) {
+						fos.write(buffer, 0, bytesRead);
+						totalBytes += bytesRead;
+					}
 				}
-
-				fos.close();
-				is.close();
 				System.out.println("Saved to: " + outputFile + " (" + totalBytes + " bytes)");
 			} else {
 				System.out.println("Error: " + conn.getResponseMessage());
@@ -222,19 +217,16 @@ public class WadoRsRetrieveDemo {
 			System.out.println("Response Code: " + responseCode);
 
 			if (responseCode == 200) {
-				InputStream is = conn.getInputStream();
-				FileOutputStream fos = new FileOutputStream(outputFile);
-
-				byte[] buffer = new byte[8192];
-				int bytesRead;
 				long totalBytes = 0;
-				while ((bytesRead = is.read(buffer)) != -1) {
-					fos.write(buffer, 0, bytesRead);
-					totalBytes += bytesRead;
+				try (InputStream is = conn.getInputStream();
+					 FileOutputStream fos = new FileOutputStream(outputFile)) {
+					byte[] buffer = new byte[8192];
+					int bytesRead;
+					while ((bytesRead = is.read(buffer)) != -1) {
+						fos.write(buffer, 0, bytesRead);
+						totalBytes += bytesRead;
+					}
 				}
-
-				fos.close();
-				is.close();
 				System.out.println("Saved to: " + outputFile + " (" + totalBytes + " bytes)");
 			} else {
 				System.out.println("Error: " + conn.getResponseMessage());

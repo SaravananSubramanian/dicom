@@ -28,6 +28,11 @@ public class StorageCommitmentEventHandler {
 	public static final int STORAGE_COMMITMENT_SUCCESSFUL = 1;
 	public static final int STORAGE_COMMITMENT_COMPLETE = 2;
 
+	// Missing DICOM tags
+	private static final AttributeTag TransactionUID = new AttributeTag(0x0008, 0x1195);
+	private static final AttributeTag FailedSOPSequence = new AttributeTag(0x0008, 0x1198);
+	private static final AttributeTag FailureReason = new AttributeTag(0x0008, 0x1197);
+
 	/**
 	 * Parse a Storage Commitment N-EVENT-REPORT response
 	 */
@@ -36,7 +41,7 @@ public class StorageCommitmentEventHandler {
 		System.out.println("=== Storage Commitment Event Report ===\n");
 
 		// Get the Transaction UID - matches the one from our N-ACTION request
-		String transactionUID = getStringValue(eventInfo, TagFromName.TransactionUID);
+		String transactionUID = getStringValue(eventInfo, TransactionUID);
 		System.out.println("Transaction UID: " + transactionUID);
 
 		if (eventTypeID == STORAGE_COMMITMENT_SUCCESSFUL) {
@@ -54,7 +59,7 @@ public class StorageCommitmentEventHandler {
 			System.out.println("Successfully Committed: " + successCount + " images");
 
 			for (int i = 0; i < successCount; i++) {
-				AttributeList item = successSequence.getItem(i);
+				AttributeList item = successSequence.getItem(i).getAttributeList();
 				String sopClass = getStringValue(item, TagFromName.ReferencedSOPClassUID);
 				String sopInstance = getStringValue(item, TagFromName.ReferencedSOPInstanceUID);
 
@@ -64,7 +69,7 @@ public class StorageCommitmentEventHandler {
 		}
 
 		// Process failed images (if any)
-		Attribute failSeqAttr = eventInfo.get(TagFromName.FailedSOPSequence);
+		Attribute failSeqAttr = eventInfo.get(FailedSOPSequence);
 		if (failSeqAttr != null && failSeqAttr instanceof SequenceAttribute) {
 			SequenceAttribute failSequence = (SequenceAttribute) failSeqAttr;
 			int failCount = failSequence.getNumberOfItems();
@@ -73,14 +78,14 @@ public class StorageCommitmentEventHandler {
 				System.out.println("\nFailed to Commit: " + failCount + " images");
 
 				for (int i = 0; i < failCount; i++) {
-					AttributeList item = failSequence.getItem(i);
+					AttributeList item = failSequence.getItem(i).getAttributeList();
 					String sopClass = getStringValue(item, TagFromName.ReferencedSOPClassUID);
 					String sopInstance = getStringValue(item, TagFromName.ReferencedSOPInstanceUID);
-					String failureReason = getStringValue(item, TagFromName.FailureReason);
+					String failureReasonValue = getStringValue(item, FailureReason);
 
 					System.out.println("  [" + (i + 1) + "] SOP Instance: " + sopInstance);
 					System.out.println("      SOP Class: " + sopClass);
-					System.out.println("      Failure Reason: " + getFailureReasonDescription(failureReason));
+					System.out.println("      Failure Reason: " + getFailureReasonDescription(failureReasonValue));
 				}
 			}
 		}

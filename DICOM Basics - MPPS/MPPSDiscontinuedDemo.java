@@ -5,6 +5,7 @@ import java.util.Date;
 
 import com.pixelmed.dicom.Attribute;
 import com.pixelmed.dicom.AttributeList;
+import com.pixelmed.dicom.AttributeTag;
 import com.pixelmed.dicom.CodeStringAttribute;
 import com.pixelmed.dicom.DateAttribute;
 import com.pixelmed.dicom.LongStringAttribute;
@@ -31,6 +32,13 @@ import com.pixelmed.dicom.TimeAttribute;
  * For more information: http://www.saravanansubramanian.com
  */
 public class MPPSDiscontinuedDemo {
+
+	// Define missing DICOM tags
+	private static final AttributeTag PerformedProcedureStepEndDate = new AttributeTag(0x0040, 0x0250);
+	private static final AttributeTag PerformedProcedureStepEndTime = new AttributeTag(0x0040, 0x0251);
+	private static final AttributeTag PerformedProcedureStepStatus = new AttributeTag(0x0040, 0x0252);
+	private static final AttributeTag ProcedureStepDiscontinuationReasonCodeSequence = new AttributeTag(0x0040, 0x0281);
+	private static final AttributeTag PerformedSeriesSequence = new AttributeTag(0x0040, 0x0340);
 
 	public static void main(String[] args) {
 
@@ -93,23 +101,23 @@ public class MPPSDiscontinuedDemo {
 		Date now = new Date();
 
 		// === End date/time ===
-		Attribute ppsEndDate = new DateAttribute(TagFromName.PerformedProcedureStepEndDate);
+		Attribute ppsEndDate = new DateAttribute(PerformedProcedureStepEndDate);
 		ppsEndDate.addValue(dateFormat.format(now));
 		list.put(ppsEndDate);
 
-		Attribute ppsEndTime = new TimeAttribute(TagFromName.PerformedProcedureStepEndTime);
+		Attribute ppsEndTime = new TimeAttribute(PerformedProcedureStepEndTime);
 		ppsEndTime.addValue(timeFormat.format(now));
 		list.put(ppsEndTime);
 
 		// === Status: DISCONTINUED ===
-		Attribute ppsStatus = new CodeStringAttribute(TagFromName.PerformedProcedureStepStatus);
+		Attribute ppsStatus = new CodeStringAttribute(PerformedProcedureStepStatus);
 		ppsStatus.addValue("DISCONTINUED");
 		list.put(ppsStatus);
 
 		// === Procedure Step Discontinuation Reason Code Sequence ===
 		// This explains WHY the procedure was discontinued
 		SequenceAttribute discontinuationReasonSeq =
-			new SequenceAttribute(TagFromName.ProcedureStepDiscontinuationReasonCodeSequence);
+			new SequenceAttribute(ProcedureStepDiscontinuationReasonCodeSequence);
 
 		AttributeList reasonItem = new AttributeList();
 
@@ -130,7 +138,7 @@ public class MPPSDiscontinuedDemo {
 
 		// === Performed Series Sequence ===
 		// May contain partial data if some images were acquired before discontinuation
-		SequenceAttribute performedSeriesSeq = new SequenceAttribute(TagFromName.PerformedSeriesSequence);
+		SequenceAttribute performedSeriesSeq = new SequenceAttribute(PerformedSeriesSequence);
 		// Leave empty if no images were acquired, or populate with partial acquisition data
 		list.put(performedSeriesSeq);
 

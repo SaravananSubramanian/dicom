@@ -100,7 +100,7 @@ public class ReadStructuredReportDemo {
 
 		// Traverse each item
 		for (int i = 0; i < contentSeq.getNumberOfItems(); i++) {
-			AttributeList item = contentSeq.getItem(i);
+			AttributeList item = contentSeq.getItem(i).getAttributeList();
 			traverseContentItem(item, 0);
 		}
 	}
@@ -138,7 +138,7 @@ public class ReadStructuredReportDemo {
 		if (childSeqAttr != null && childSeqAttr instanceof SequenceAttribute) {
 			SequenceAttribute childSeq = (SequenceAttribute) childSeqAttr;
 			for (int i = 0; i < childSeq.getNumberOfItems(); i++) {
-				traverseContentItem(childSeq.getItem(i), depth + 1);
+				traverseContentItem(childSeq.getItem(i).getAttributeList(), depth + 1);
 			}
 		}
 	}
@@ -152,7 +152,7 @@ public class ReadStructuredReportDemo {
 		if (seqAttr != null && seqAttr instanceof SequenceAttribute) {
 			SequenceAttribute seq = (SequenceAttribute) seqAttr;
 			if (seq.getNumberOfItems() > 0) {
-				AttributeList codeItem = seq.getItem(0);
+				AttributeList codeItem = seq.getItem(0).getAttributeList();
 				String meaning = getStringValue(codeItem, TagFromName.CodeMeaning);
 				String codeValue = getStringValue(codeItem, TagFromName.CodeValue);
 				return meaning + " (" + codeValue + ")";
@@ -177,7 +177,7 @@ public class ReadStructuredReportDemo {
 				if (codeSeqAttr != null && codeSeqAttr instanceof SequenceAttribute) {
 					SequenceAttribute seq = (SequenceAttribute) codeSeqAttr;
 					if (seq.getNumberOfItems() > 0) {
-						AttributeList codeItem = seq.getItem(0);
+						AttributeList codeItem = seq.getItem(0).getAttributeList();
 						return getStringValue(codeItem, TagFromName.CodeMeaning);
 					}
 				}
@@ -188,7 +188,7 @@ public class ReadStructuredReportDemo {
 				if (measSeqAttr != null && measSeqAttr instanceof SequenceAttribute) {
 					SequenceAttribute seq = (SequenceAttribute) measSeqAttr;
 					if (seq.getNumberOfItems() > 0) {
-						AttributeList measItem = seq.getItem(0);
+						AttributeList measItem = seq.getItem(0).getAttributeList();
 						String numValue = getStringValue(measItem, TagFromName.NumericValue);
 						// Get units
 						Attribute unitsSeqAttr = measItem.get(TagFromName.MeasurementUnitsCodeSequence);
@@ -196,7 +196,7 @@ public class ReadStructuredReportDemo {
 						if (unitsSeqAttr != null && unitsSeqAttr instanceof SequenceAttribute) {
 							SequenceAttribute unitsSeq = (SequenceAttribute) unitsSeqAttr;
 							if (unitsSeq.getNumberOfItems() > 0) {
-								units = " " + getStringValue(unitsSeq.getItem(0), TagFromName.CodeValue);
+								units = " " + getStringValue(unitsSeq.getItem(0).getAttributeList(), TagFromName.CodeValue);
 							}
 						}
 						return numValue + units;
@@ -231,7 +231,7 @@ public class ReadStructuredReportDemo {
 
 		try {
 			StructuredReport sr = new StructuredReport(list);
-			ContentItem root = sr.getRoot();
+			ContentItem root = (ContentItem) sr.getRoot();
 
 			if (root != null) {
 				System.out.println("Root concept: " + root.getConceptNameCodeMeaning());

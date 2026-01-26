@@ -9,6 +9,7 @@ import com.pixelmed.dicom.SOPClass;
 import com.pixelmed.dicom.SequenceAttribute;
 import com.pixelmed.dicom.TagFromName;
 import com.pixelmed.dicom.TransferSyntax;
+import com.pixelmed.dicom.UIDGenerator;
 import com.pixelmed.dicom.UniqueIdentifierAttribute;
 import com.pixelmed.network.Association;
 import com.pixelmed.network.AssociationFactory;
@@ -43,6 +44,9 @@ public class StorageCommitmentDemo {
 	// Storage Commitment SOP Class UID
 	private static final String STORAGE_COMMITMENT_PUSH_MODEL_SOP_CLASS = "1.2.840.10008.1.20.1";
 	private static final String STORAGE_COMMITMENT_PUSH_MODEL_SOP_INSTANCE = "1.2.840.10008.1.20.1.1";
+
+	// Missing DICOM tag
+	private static final AttributeTag TransactionUID = new AttributeTag(0x0008, 0x1195);
 
 	public static void main(String[] args) {
 
@@ -100,9 +104,7 @@ public class StorageCommitmentDemo {
 				presentationContexts,
 				null,  // no user identity
 				false, // not secure
-				null,  // debugLevel
-				0,     // associateRequestTimeout
-				0      // pduTimeout
+				0      // debugLevel
 			);
 
 			if (association != null) {
@@ -112,7 +114,7 @@ public class StorageCommitmentDemo {
 				AttributeList actionInfo = buildStorageCommitmentRequest(sopInstanceUIDs, sopClassUIDs);
 
 				System.out.println("Storage Commitment Request Details:");
-				System.out.println("Transaction UID: " + actionInfo.get(TagFromName.TransactionUID).getSingleStringValueOrNull());
+				System.out.println("Transaction UID: " + actionInfo.get(TransactionUID).getSingleStringValueOrNull());
 				System.out.println("Number of references: " + sopInstanceUIDs.length);
 
 				// In a real implementation, you would:
@@ -153,9 +155,9 @@ public class StorageCommitmentDemo {
 		AttributeList actionInfo = new AttributeList();
 
 		// Generate a unique Transaction UID for this commitment request
-		String transactionUID = UniqueIdentifierAttribute.createUID();
-		Attribute transactionUIDAttr = new UniqueIdentifierAttribute(TagFromName.TransactionUID);
-		transactionUIDAttr.addValue(transactionUID);
+		String transactionUIDValue = new UIDGenerator().getNewUID();
+		Attribute transactionUIDAttr = new UniqueIdentifierAttribute(TransactionUID);
+		transactionUIDAttr.addValue(transactionUIDValue);
 		actionInfo.put(transactionUIDAttr);
 
 		// Build the Referenced SOP Sequence
